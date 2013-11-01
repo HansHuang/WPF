@@ -1,0 +1,24 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3c.org/TR/1999/REC-html401-19991224/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <title></title>
+    <script type="text/javascript" charset="utf-8" src="ueditor/ueditor.config.js"></script>
+    <script type="text/javascript" charset="utf-8" src="ueditor/ueditor.all.js"></script>
+</head>
+<body style="margin: 0; padding: 0;">
+    <div style="width: 98%; margin: auto;">
+        <script type="text/plain" id="myEditor">
+        $HansTemplate$
+        </script>
+    </div>
+
+    <script type="text/javascript">
+        UE.getEditor('myEditor');
+
+        function getContent() {
+            return UE.getEditor('myEditor').getContent();
+        }
+    </script>
+</body>
+</html>
