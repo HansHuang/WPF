@@ -1,0 +1,9 @@
+﻿<Window x:Class="GifImageControl.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:cc="clr-namespace:GifImageControl"
+        Title="MainWindow" Height="200" Width="320">
+    <Grid>
+    <cc:GifImage Source="cat.gif" VerticalAlignment="Center"/>
+  </Grid>
+</Window>
