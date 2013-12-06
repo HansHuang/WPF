@@ -1,0 +1,65 @@
+﻿<Window x:Class="MVVMPratice.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:local="clr-namespace:MVVMPratice"
+        Title="MVVM Pratice" Height="240" Width="320"
+        WindowStyle="None" AllowsTransparency="True" BorderBrush="#FFFFFFFF" BorderThickness="1"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="MouseLeftButtonDown">
+            <i:InvokeCommandAction Command="{Binding ViewModel.MoveWindowCmd}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Window.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding ViewModel.CloseWindowCmd}"/>
+    </Window.InputBindings>
+    <Window.BitmapEffect>
+        <DropShadowBitmapEffect Color="#FF000000"/>
+    </Window.BitmapEffect>
+    <Window.Background>
+        <LinearGradientBrush EndPoint="1,1" StartPoint="0,0">
+            <GradientStop Color="#4CA2A2A2" Offset="0"/>
+            <GradientStop Color="#4CA2A2A2" Offset="1"/>
+            <GradientStop Color="#60B4B4B4" Offset="0.247"/>
+            <GradientStop Color="#60FFFFFF" Offset="0.837"/>
+            <GradientStop Color="#60FFFFFF" Offset="0.423"/>
+            <GradientStop Color="#60E7E7E7" Offset="0.709"/>
+        </LinearGradientBrush>
+    </Window.Background>
+    <Window.Resources>
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="Bool2Vsby"/>
+            <local:InverseBoolToVisibilityConverter x:Key="IvsBool2Vsby"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Margin="10" >
+            <TextBlock Text="Right Click to edit text, and Ctrl-S or Enter to save. "
+                       Foreground="Red"/>
+            <TextBlock Text="Drag to move window, Press Esc to colse window"
+                       Foreground="Red"/>
+        </StackPanel>
+        <TextBlock Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20"
+                   Text="{Binding ViewModel.Title}" 
+                   Visibility="{Binding ViewModel.IsEditMode, Converter={StaticResource IvsBool2Vsby}, Mode=OneWay}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseRightButtonUp">
+                    <i:InvokeCommandAction Command="{Binding ViewModel.ToggleEditModeCmd}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </TextBlock>
+        <TextBox Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20"
+                 Text="{Binding ViewModel.Title, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                 Visibility="{Binding ViewModel.IsEditMode, Converter={StaticResource Bool2Vsby}, Mode=OneWay}">
+            <TextBox.InputBindings>
+                <KeyBinding Key="S" Modifiers="Control" Command="{Binding ViewModel.ToggleEditModeCmd}"/>
+                <KeyBinding Key="Enter" Command="{Binding ViewModel.ToggleEditModeCmd}"/>
+            </TextBox.InputBindings>
+        </TextBox>
+    </Grid>
+</Window>
