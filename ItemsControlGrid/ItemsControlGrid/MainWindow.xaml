@@ -1,0 +1,65 @@
+﻿<Window x:Class="ItemsControlGrid.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ItemsControlGrid"
+        Title="MainWindow" Height="350" Width="525">
+
+  <Grid Background="LightGray">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="200"/>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="150"/>
+    </Grid.RowDefinitions>
+
+    <DataGrid ItemsSource="{Binding}" Margin="10"/>
+
+    <StackPanel Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                Grid.Row="1">
+      <Button Content="Add Item"
+              Margin="0,0,10,0"
+              Click="ButtonAddItem_Click"/>
+      <Button Content="Delete First Item"
+              Margin="0,0,10,0"
+              Click="ButtonDeleteItem_Click"/>
+    </StackPanel>
+        <Grid  local:GridUtils.ItemsSource="{Binding}">
+
+        </Grid>
+        <Border x:Name="LayoutRoot" Background="White"
+          BorderBrush="Black" BorderThickness="1"
+          Margin="10"
+          Grid.Row="2">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+          
+        <ItemsControl local:GridUtils.ItemsSource="{Binding}"
+                      VerticalAlignment="Top">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <Grid local:GridUtils.ItemsPerRow="3">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="2*"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+              </Grid>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <local:PhantomPanel>
+                <TextBlock Text="{Binding Path=Item}"/>
+                <TextBlock Text="{Binding Path=Quantity}" Grid.Column="1"/>
+                <Line Stroke="LightGray" StrokeThickness="1"
+                      VerticalAlignment="Bottom"
+                      X1="0" X2="1" Y1="0" Y2="0"
+                      Stretch="Fill"
+                      Grid.ColumnSpan="2"/>
+              </local:PhantomPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Border>
+
+  </Grid>
+</Window>
