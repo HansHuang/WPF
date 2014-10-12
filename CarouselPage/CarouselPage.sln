@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarouselPageDemo", "CarouselPage\CarouselPageDemo.csproj", "{62DF0E30-14EB-431D-AFB6-63B9398CAC8E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarouselPageDemo2", "CarouselPageDemo2\CarouselPageDemo2.csproj", "{7E47A3E6-B31C-45B8-9EF2-4D3605FCFF5C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{62DF0E30-14EB-431D-AFB6-63B9398CAC8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62DF0E30-14EB-431D-AFB6-63B9398CAC8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62DF0E30-14EB-431D-AFB6-63B9398CAC8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62DF0E30-14EB-431D-AFB6-63B9398CAC8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E47A3E6-B31C-45B8-9EF2-4D3605FCFF5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E47A3E6-B31C-45B8-9EF2-4D3605FCFF5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E47A3E6-B31C-45B8-9EF2-4D3605FCFF5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E47A3E6-B31C-45B8-9EF2-4D3605FCFF5C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
