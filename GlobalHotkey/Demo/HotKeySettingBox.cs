@@ -1,0 +1,176 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace Demo
+{
+  public class HotkeySettingBox : TextBox, INotifyPropertyChanged
+  {
+    #region INotifyPropertyChanged RaisePropertyChanged
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    protected void RaisePropertyChanged(string propertyName)
+    {
+      var handler = PropertyChanged;
+      if (handler != null)
+      {
+        handler(this, new PropertyChangedEventArgs(propertyName));
+      }
+    }
+
+    #endregion
+
+    #region DependencyProperty Command
+
+    public static readonly DependencyProperty CommandProperty =
+      DependencyProperty.Register("Command", typeof(ICommand), typeof(HotkeySettingBox), new PropertyMetadata(default(ICommand),OnCmdChanged));
+
+    private static void OnCmdChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+      var box = d as HotkeySettingBox;
+      if (box == null) return;
+      
+      box.Hotkey = box.Hotkey ?? new HotKey(Key.None, ModifierKeys.None);
+
+      foreach (Delegate d in KeyMap) {
+        
+      }
+
+      var field = typeof(HotKey).GetField("HotKeyPressed", BindingFlags.Static | BindingFlags.NonPublic);
+      if (field != null) {
+        var obj = field.GetValue(box.Hotkey);
+        PropertyInfo pi = box.Hotkey.GetType().GetProperty("HotKeyPressed",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        EventHandlerList list = (EventHandlerList)pi.GetValue(box.Hotkey, null);
+        list.RemoveHandler(obj, list[obj]);
+      }
+      
+
+      box.Hotkey.HotKeyPressed += HotkeyHotKeyPressed;
+    }
+
+    static void HotkeyHotKeyPressed(object sender, HotKeyEventArgs e)
+    {
+
+    }
+
+    public ICommand Command
+    {
+      get { return (ICommand)GetValue(CommandProperty); }
+      set { SetValue(CommandProperty, value); }
+    }
+
+    #endregion
+
+    #region Hotkey (INotifyPropertyChanged Property)
+
+    private HotKey _hotkey;
+
+    public HotKey Hotkey
+    {
+      get { return _hotkey; }
+      set
+      {
+        if (_hotkey != null && _hotkey.Equals(value)) return;
+        _hotkey = value;
+        RaisePropertyChanged("Hotkey");
+        Text = value == null ? string.Empty : value.ToString();
+      }
+    }
+
+    #endregion
+
+    #region RelayCommand ClearCmd
+
+    private RelayCommand _clearCmd;
+
+    public ICommand ClearCmd
+    {
+      get { return _clearCmd ?? (_clearCmd = new RelayCommand(s => ClearExecute())); }
+    }
+
+    private void ClearExecute()
+    {
+      Hotkey = null;
+    }
+
+    #endregion
+
+    private static readonly HashSet<Key> IgnoredKeys = new HashSet<Key> {
+      Key.None,
+      Key.LineFeed,
+      Key.KanaMode,
+      Key.HangulMode,
+      Key.JunjaMode,
+      Key.FinalMode,
+      Key.HanjaMode,
+      Key.KanjiMode,
+      Key.ImeConvert,
+      Key.ImeNonConvert,
+      Key.ImeAccept,
+      Key.ImeModeChange,
+      Key.ImeProcessed,
+      Key.System,
+      Key.NoName,
+      Key.DeadCharProcessed,
+      Key.Back
+    };
+
+    private static readonly Dictionary<Key, ModifierKeys> KeyMap = new Dictionary<Key, ModifierKeys> {
+      {Key.LeftCtrl, ModifierKeys.Control},
+      {Key.RightCtrl, ModifierKeys.Control},
+      {Key.LeftAlt, ModifierKeys.Alt},
+      {Key.RightAlt, ModifierKeys.Alt},
+      {Key.LeftShift, ModifierKeys.Shift},
+      {Key.RightShift, ModifierKeys.Shift},
+      {Key.LWin, ModifierKeys.Windows},
+      {Key.RWin, ModifierKeys.Windows}
+    };
+
+    //static HotkeySettingBox()
+    //{
+    //  DefaultStyleKeyProperty.OverrideMetadata(typeof(HotkeySettingBox), new FrameworkPropertyMetadata(typeof(HotkeySettingBox)));
+    //}
+
+    public override void OnApplyTemplate()
+    {
+      base.OnApplyTemplate();
+      IsReadOnly = true;
+
+      PreviewKeyDown += (s, e) =>
+      {
+        var key = Key.None;
+        var modifider = ModifierKeys.None;
+        foreach (Key k in Enum.GetValues(typeof(Key)))
+        {
+          if (IgnoredKeys.Contains(k) || !Keyboard.IsKeyDown(k)) continue;
+          if (KeyMap.ContainsKey(k))
+            modifider |= KeyMap[k];
+          else
+            key = k;
+        }
+        if (Hotkey == null)
+          Hotkey = new HotKey(key, modifider);
+        else
+        {
+          Hotkey.Key = key;
+          Hotkey.Modifiers = modifider;
+        }
+        e.Handled = true;
+      };
+    }
+
+  }
+}

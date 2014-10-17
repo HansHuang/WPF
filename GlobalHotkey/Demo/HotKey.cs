@@ -4,31 +4,12 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Windows.Input;
 using System.Windows.Interop;
 
 namespace Demo
 {
-  public class HotKeyEventArgs : EventArgs
-  {
-    public HotKey HotKey { get; private set; }
-
-    public HotKeyEventArgs(HotKey hotKey)
-    {
-      HotKey = hotKey;
-    }
-  }
-
-  [Serializable]
-  public class HotKeyAlreadyRegisteredException : Exception
-  {
-    public HotKey HotKey { get; private set; }
-    public HotKeyAlreadyRegisteredException(string message, HotKey hotKey) : base(message) { HotKey = hotKey; }
-    public HotKeyAlreadyRegisteredException(string message, HotKey hotKey, Exception inner) : base(message, inner) { HotKey = hotKey; }
-    protected HotKeyAlreadyRegisteredException(SerializationInfo info, StreamingContext context)
-      : base(info, context) { }
-  }
-
   /// <summary>
   /// Represents an hotKey
   /// </summary>
@@ -53,6 +34,7 @@ namespace Demo
     #region Key (INotifyPropertyChanged Property)
 
     private Key _key;
+
     /// <summary>
     /// The Key. Must not be null when registering to an HotKeyHost.
     /// </summary>
@@ -72,6 +54,7 @@ namespace Demo
     #region Modifiers (INotifyPropertyChanged Property)
 
     private ModifierKeys _modifiers;
+
     /// <summary>
     /// The modifier. Multiple modifiers can be combined with or.
     /// </summary>
@@ -106,25 +89,21 @@ namespace Demo
     #endregion
 
     #region Construction methods
-    /// <summary>
-    /// Creates an HotKey object. This instance has to be registered in an HotKeyHost.
-    /// </summary>
-    public HotKey() { }
 
     /// <summary>
     /// Creates an HotKey object. This instance has to be registered in an HotKeyHost.
     /// </summary>
-    /// <param name="key">The key</param>
-    /// <param name="modifiers">The modifier. Multiple modifiers can be combined with or.</param>
-    public HotKey(Key key, ModifierKeys modifiers) : this(key, modifiers, true) { }
-
+    public HotKey()
+    {
+    }
+    
     /// <summary>
     /// Creates an HotKey object. This instance has to be registered in an HotKeyHost.
     /// </summary>
     /// <param name="key">The key</param>
     /// <param name="modifiers">The modifier. Multiple modifiers can be combined with or.</param>
     /// <param name="enabled">Specifies whether the HotKey will be enabled when registered to an HotKeyHost</param>
-    public HotKey(Key key, ModifierKeys modifiers, bool enabled)
+    public HotKey(Key key, ModifierKeys modifiers, bool enabled = true)
     {
       Key = key;
       Modifiers = modifiers;
@@ -137,9 +116,11 @@ namespace Demo
       Modifiers = (ModifierKeys)info.GetValue("Modifiers", typeof(ModifierKeys));
       Enabled = info.GetBoolean("Enabled");
     }
+
     #endregion
 
-    #region Override methods of Object 
+    #region Override methods of Object
+
     public override bool Equals(object obj)
     {
       var hotKey = obj as HotKey;
@@ -158,11 +139,20 @@ namespace Demo
 
     public override string ToString()
     {
-      return string.Format("{0} + {1} ({2}Enabled)", Key, Modifiers, Enabled ? "" : "Not ");
-    } 
+      var sb = new StringBuilder();
+      if (Modifiers != ModifierKeys.None) sb.Append(Modifiers);
+      if (Key != Key.None)
+      {
+        if (sb.Length > 0) sb.Append(" + ");
+        sb.Append(Key);
+      }
+      return sb.ToString();
+    }
+
     #endregion
 
     #region Event: HotKeyPressed
+
     /// <summary>
     /// Will be raised if the hotkey is pressed (works only if registed in HotKeyHost)
     /// </summary>
@@ -177,17 +167,22 @@ namespace Demo
     internal void RaiseOnHotKeyPressed()
     {
       OnHotKeyPress();
-    } 
+    }
+
     #endregion
 
     #region GetObjectData
+
     public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
     {
       info.AddValue("Key", Key, typeof(Key));
       info.AddValue("Modifiers", Modifiers, typeof(ModifierKeys));
       info.AddValue("Enabled", Enabled);
-    } 
+    }
+
     #endregion
+
+    
   }
 
   /// <summary>
@@ -214,7 +209,7 @@ namespace Demo
     private const int WmHotKey = 786;
 
     [DllImport("user32", CharSet = CharSet.Ansi,
-               SetLastError = true, ExactSpelling = true)]
+      SetLastError = true, ExactSpelling = true)]
     private static extern int RegisterHotKey(IntPtr hwnd, int id, int modifiers, int key);
 
     [DllImport("user32", CharSet = CharSet.Ansi, SetLastError = true, ExactSpelling = true)]
@@ -227,9 +222,10 @@ namespace Demo
     private readonly HwndSourceHook _hook;
     private readonly HwndSource _hwndSource;
 
-    private void RegisterHotKey(int id, HotKey hotKey) {
-      if ((int) _hwndSource.Handle == 0) throw new InvalidOperationException("Handle is invalid");
-      RegisterHotKey(_hwndSource.Handle, id, (int) hotKey.Modifiers, KeyInterop.VirtualKeyFromKey(hotKey.Key));
+    private void RegisterHotKey(int id, HotKey hotKey)
+    {
+      if ((int)_hwndSource.Handle == 0) throw new InvalidOperationException("Handle is invalid");
+      RegisterHotKey(_hwndSource.Handle, id, (int)hotKey.Modifiers, KeyInterop.VirtualKeyFromKey(hotKey.Key));
       var error = Marshal.GetLastWin32Error();
       if (error == 0) return;
       Exception e = new Win32Exception(error);
@@ -263,7 +259,7 @@ namespace Demo
       {
         if (_hotKeys.ContainsKey((int)wParam))
         {
-          HotKey h = _hotKeys[(int)wParam];
+          var h = _hotKeys[(int)wParam];
           h.RaiseOnHotKeyPressed();
           if (HotKeyPressed != null)
             HotKeyPressed(this, new HotKeyEventArgs(h));
@@ -274,7 +270,7 @@ namespace Demo
     }
 
 
-    void HotKeyPropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void HotKeyPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
       var kvPair = _hotKeys.FirstOrDefault(h => Equals(h.Value, sender));
       if (kvPair.Value != null)
@@ -319,10 +315,14 @@ namespace Demo
     /// <summary>
     /// All registered hotKeys
     /// </summary>
-    public IEnumerable<HotKey> HotKeys { get { return _hotKeys.Values; } }
+    public IEnumerable<HotKey> HotKeys
+    {
+      get { return _hotKeys.Values; }
+    }
 
 
-    private static readonly SerialCounter IDGen = new SerialCounter(1); //Annotation: Can be replaced with "Random"-class
+    private static readonly SerialCounter IDGen = new SerialCounter(1);
+    //Annotation: Can be replaced with "Random"-class
 
     /// <summary>
     /// Adds an hotKey.
@@ -330,14 +330,12 @@ namespace Demo
     /// <param name="hotKey">The hotKey which will be added. Must not be null and can be registed only once.</param>
     public void AddHotKey(HotKey hotKey)
     {
-      if (hotKey == null)
-        throw new ArgumentNullException("value");
-      if (hotKey.Key == 0)
-        throw new ArgumentNullException("value.Key");
+      if (hotKey == null || hotKey.Key == 0)
+        throw new ArgumentNullException("hotKey");
       if (_hotKeys.ContainsValue(hotKey))
         throw new HotKeyAlreadyRegisteredException("HotKey already registered!", hotKey);
 
-      int id = IDGen.Next();
+      var id = IDGen.Next();
       if (hotKey.Enabled)
         RegisterHotKey(id, hotKey);
       hotKey.PropertyChanged += HotKeyPropertyChanged;
@@ -388,17 +386,49 @@ namespace Demo
 
     public void Dispose()
     {
-      this.Dispose(true);
+      Dispose(true);
       GC.SuppressFinalize(this);
     }
 
     ~HotKeyHost()
     {
-      this.Dispose(false);
+      Dispose(false);
     }
 
     #endregion
   }
-}
 
-//Helper: http://www.codeproject.com/Tips/274003/Global-Hotkeys-in-WPF
+
+  public class HotKeyEventArgs : EventArgs
+  {
+    public HotKey HotKey { get; private set; }
+
+    public HotKeyEventArgs(HotKey hotKey)
+    {
+      HotKey = hotKey;
+    }
+  }
+
+  [Serializable]
+  public class HotKeyAlreadyRegisteredException : Exception
+  {
+    public HotKey HotKey { get; private set; }
+
+    public HotKeyAlreadyRegisteredException(string message, HotKey hotKey)
+      : base(message)
+    {
+      HotKey = hotKey;
+    }
+
+    public HotKeyAlreadyRegisteredException(string message, HotKey hotKey, Exception inner)
+      : base(message, inner)
+    {
+      HotKey = hotKey;
+    }
+
+    protected HotKeyAlreadyRegisteredException(SerializationInfo info, StreamingContext context)
+      : base(info, context)
+    {
+    }
+  }
+}
