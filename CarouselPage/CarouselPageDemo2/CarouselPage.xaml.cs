@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,22 +44,22 @@ namespace CarouselPageDemo2
         #region Pages
 
         public static readonly DependencyProperty PagesProperty = DependencyProperty.Register(
-            "Pages", typeof (ObservableCollection<UIElement>), typeof (CarouselPage),
+            "Pages", typeof (ObservableCollection<Panel>), typeof (CarouselPage),
             new PropertyMetadata(null, PagesChanged));
 
         private static void PagesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var ctrl = d as CarouselPage;
             if (ctrl == null) return;
-            var old = e.OldValue as ObservableCollection<UIElement>;
-            var neW = e.NewValue as ObservableCollection<UIElement>;
+            var old = e.OldValue as ObservableCollection<Panel>;
+            var neW = e.NewValue as ObservableCollection<Panel>;
             if (old != null) old.CollectionChanged -= ctrl.PagesCollectionChanged;
             if (neW != null) neW.CollectionChanged += ctrl.PagesCollectionChanged;
         }
 
-        public ObservableCollection<UIElement> Pages
+        public ObservableCollection<Panel> Pages
         {
-            get { return (ObservableCollection<UIElement>) GetValue(PagesProperty); }
+            get { return (ObservableCollection<Panel>)GetValue(PagesProperty); }
             set { SetValue(PagesProperty, value); }
         }
 
@@ -66,9 +67,9 @@ namespace CarouselPageDemo2
 
         #region ActivedPage (INotifyPropertyChanged Property)
 
-        private UIElement _activedPage;
+        private Panel _activedPage;
 
-        public UIElement ActivedPage
+        public Panel ActivedPage
         {
             get { return _activedPage; }
             set
@@ -83,15 +84,15 @@ namespace CarouselPageDemo2
 
         #region AnimaterPage (INotifyPropertyChanged Property)
 
-        private UIElement _AnimaterPage;
+        private Panel _animaterPage;
 
-        public UIElement AnimaterPage
+        public Panel AnimaterPage
         {
-            get { return _AnimaterPage; }
+            get { return _animaterPage; }
             set
             {
-                if (_AnimaterPage != null && _AnimaterPage.Equals(value)) return;
-                _AnimaterPage = value;
+                if (_animaterPage != null && _animaterPage.Equals(value)) return;
+                _animaterPage = value;
                 RaisePropertyChanged("AnimaterPage");
             }
         }
@@ -123,13 +124,18 @@ namespace CarouselPageDemo2
                 Viewer.BeginStoryboard((Storyboard) Resources["SlideRightToLeft"]);
 
             _lastIndex = idx;
+            //release the AnimaterPage
+            Task.Run(async () => await Task.Delay(600)).ContinueWith(s =>
+            {
+                AnimaterPage = null;
+            }, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         #endregion
 
         public CarouselPage()
         {
-            Pages = new ObservableCollection<UIElement>();
+            Pages = new ObservableCollection<Panel>();
             Pages.CollectionChanged += PagesCollectionChanged;
             InitializeComponent();
         }
