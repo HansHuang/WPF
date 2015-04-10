@@ -1,0 +1,26 @@
+﻿<Window x:Class="WpfApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:WpfApp"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid>
+        <TabControl>
+            <TabItem Header="TexeElement"
+                     TextElement.FontSize="22" TextElement.FontStyle="Italic" TextElement.Foreground="Green" >
+                <StackPanel Orientation="Vertical"  >
+                    <Button Content="I, Button" HorizontalAlignment="Left" TextElement.Foreground="Red"/>
+                    <Label Content="I, Lable"/>
+                    <Grid>
+                        <DatePicker />
+                    </Grid>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="My Shared Dp" local:EntityItem.ItemTag="My Shared Tag">
+                <StackPanel Orientation="Vertical">
+                    <local:ControlOne Header="Header Of Control One"/>
+                    <local:ControlTwo Title="Title Of Control Tow"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
